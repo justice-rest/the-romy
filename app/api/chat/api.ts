@@ -9,10 +9,6 @@ import { FREE_MODELS_IDS, NON_AUTH_ALLOWED_MODELS } from "@/lib/config"
 import { getProviderForModel } from "@/lib/openproviders/provider-map"
 import { sanitizeUserInput } from "@/lib/sanitize"
 import { validateUserIdentity } from "@/lib/server/api"
-import {
-  checkMessageAccess,
-  trackMessageUsage,
-} from "@/lib/subscription/autumn-client"
 import { checkUsageByModel, incrementUsage } from "@/lib/usage"
 import {
   getEffectiveApiKey,
@@ -56,24 +52,6 @@ export async function validateAndTrackUsage({
   // Check usage limits for the model
   await checkUsageByModel(supabase, userId, model, isAuthenticated)
 
-  // If authenticated, also check Autumn subscription limits
-  if (isAuthenticated) {
-    const autumnCheck = await checkMessageAccess(userId)
-
-    if (!autumnCheck.allowed) {
-      const limitText = autumnCheck.limit
-        ? ` of ${autumnCheck.limit} messages`
-        : ""
-      const balanceText = autumnCheck.balance !== undefined
-        ? ` (${autumnCheck.balance} remaining)`
-        : ""
-
-      throw new Error(
-        `You've reached your message limit${limitText}${balanceText}. Please upgrade your subscription to continue.`
-      )
-    }
-  }
-
   return supabase
 }
 
@@ -90,11 +68,6 @@ export async function incrementMessageCount({
 
   try {
     await incrementUsage(supabase, userId)
-
-    // Track usage in Autumn for authenticated users
-    if (isAuthenticated) {
-      await trackMessageUsage(userId)
-    }
   } catch (err) {
     console.error("Failed to increment message count:", err)
     // Don't throw error as this shouldn't block the chat
