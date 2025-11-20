@@ -12,9 +12,20 @@ import { AutumnProvider } from "autumn-js/react"
  * - Feature access checks
  * - Usage tracking
  *
- * The backendUrl is empty string because we're using a Next.js fullstack setup
- * with the Autumn handler at /api/autumn/*
+ * In development, we use relative URLs (empty string).
+ * In production, we need to provide the full domain with https:// scheme
+ * for the Autumn SDK to construct proper API URLs.
  */
 export function AutumnWrapper({ children }: { children: React.ReactNode }) {
-  return <AutumnProvider backendUrl="">{children}</AutumnProvider>
+  // Get the backend URL based on environment
+  const backendUrl =
+    process.env.NODE_ENV === "development"
+      ? "" // In dev, relative URLs work fine
+      : typeof window !== "undefined"
+        ? window.location.origin // Client-side: use current origin
+        : process.env.NEXT_PUBLIC_VERCEL_URL
+          ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` // Server-side: construct from env var
+          : "" // Fallback to relative URL
+
+  return <AutumnProvider backendUrl={backendUrl}>{children}</AutumnProvider>
 }
