@@ -22,13 +22,16 @@ export async function middleware(request: NextRequest) {
   const supabaseDomain = supabaseUrl ? new URL(supabaseUrl).origin : ""
 
   // PostHog domains for analytics
-  const posthostHost = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com"
+  const posthogHost =
+    process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com"
+  // PostHog uses separate domains for API (us.i.posthog.com) and assets (us-assets.i.posthog.com)
+  const posthogAssets = "https://us-assets.i.posthog.com"
 
   response.headers.set(
     "Content-Security-Policy",
     isDev
-      ? `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://assets.onedollarstats.com ${posthostHost}; frame-src 'self' https://www.youtube.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' wss: https://api.openai.com https://api.mistral.ai https://api.supabase.com ${supabaseDomain} https://api.github.com https://collector.onedollarstats.com ${posthostHost};`
-      : `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://analytics.umami.is https://vercel.live https://assets.onedollarstats.com ${posthostHost}; frame-src 'self' https://vercel.live https://www.youtube.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' wss: https://api.openai.com https://api.mistral.ai https://api.supabase.com ${supabaseDomain} https://api-gateway.umami.dev https://api.github.com https://collector.onedollarstats.com ${posthostHost};`
+      ? `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://assets.onedollarstats.com ${posthogHost} ${posthogAssets}; frame-src 'self' https://www.youtube.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' wss: https://api.openai.com https://api.mistral.ai https://api.supabase.com ${supabaseDomain} https://api.github.com https://collector.onedollarstats.com ${posthogHost} ${posthogAssets};`
+      : `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://analytics.umami.is https://vercel.live https://assets.onedollarstats.com ${posthogHost} ${posthogAssets}; frame-src 'self' https://vercel.live https://www.youtube.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' wss: https://api.openai.com https://api.mistral.ai https://api.supabase.com ${supabaseDomain} https://api-gateway.umami.dev https://api.github.com https://collector.onedollarstats.com ${posthogHost} ${posthogAssets};`
   )
 
   return response

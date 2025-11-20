@@ -10,8 +10,19 @@ import { autumnHandler } from "autumn-js/next"
  * - Checkout flows for subscription purchases
  * - Feature access checks
  * - Usage tracking
+ *
+ * IMPORTANT: Requires AUTUMN_SECRET_KEY environment variable
  */
+
+// Check if Autumn is configured
+if (!process.env.AUTUMN_SECRET_KEY) {
+  console.warn(
+    "⚠️  AUTUMN_SECRET_KEY not set - subscription features will not work"
+  )
+}
+
 export const { GET, POST } = autumnHandler({
+  secretKey: process.env.AUTUMN_SECRET_KEY!,
   identify: async (request) => {
     // Get Supabase client with user session
     const supabase = await createClient()
