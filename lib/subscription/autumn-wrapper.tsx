@@ -13,13 +13,13 @@ import { AutumnProvider } from "autumn-js/react"
  * - Usage tracking
  *
  * Configuration:
- * - backendUrl: Empty string for same-origin (relative URLs)
+ * - backendUrl: Points to /api/autumn endpoint
  * - includeCredentials: true to send cookies with requests (required for Supabase auth)
  */
 export function AutumnWrapper({ children }: { children: React.ReactNode }) {
   return (
     <AutumnProvider
-      backendUrl="" // Use relative URLs - we're in same origin
+      backendUrl="/api/autumn"
       includeCredentials={true} // Include cookies for authentication
     >
       {children}
