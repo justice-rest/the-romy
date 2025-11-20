@@ -61,8 +61,15 @@ export async function validateAndTrackUsage({
     const autumnCheck = await checkMessageAccess(userId)
 
     if (!autumnCheck.allowed) {
+      const limitText = autumnCheck.limit
+        ? ` of ${autumnCheck.limit} messages`
+        : ""
+      const balanceText = autumnCheck.balance !== undefined
+        ? ` (${autumnCheck.balance} remaining)`
+        : ""
+
       throw new Error(
-        `You've reached your message limit${autumnCheck.limit ? ` of ${autumnCheck.limit} messages` : ""}. Please upgrade your subscription to continue.`
+        `You've reached your message limit${limitText}${balanceText}. Please upgrade your subscription to continue.`
       )
     }
   }
