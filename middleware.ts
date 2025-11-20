@@ -5,8 +5,11 @@ import { validateCsrfToken } from "./lib/csrf"
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request)
 
+  // Skip CSRF protection for Autumn API routes (they handle auth internally)
+  const isAutumnRoute = request.nextUrl.pathname.startsWith("/api/autumn")
+
   // CSRF protection for state-changing requests
-  if (["POST", "PUT", "DELETE"].includes(request.method)) {
+  if (["POST", "PUT", "DELETE"].includes(request.method) && !isAutumnRoute) {
     const csrfCookie = request.cookies.get("csrf_token")?.value
     const headerToken = request.headers.get("x-csrf-token")
 
