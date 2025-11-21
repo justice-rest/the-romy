@@ -3,6 +3,7 @@
 /**
  * Client-side pricing component
  * Renders the MM PricingComponent with Autumn checkout integration
+ * Adapted to match Rōmy's design system with dark/light mode support
  */
 
 import React from 'react';
@@ -10,9 +11,8 @@ import { useRouter } from 'next/navigation';
 import { useCustomer } from 'autumn-js/react';
 import type { UserProfile } from '@/lib/user/types';
 import type { SubscriptionTier } from '@/lib/subscriptions/types';
-import { getTierDisplayName } from '@/lib/subscriptions/check-access';
 
-// Copied exactly from MM/src/src/PricingComponent.tsx - NO MODIFICATIONS
+// Feature list item - theme aware
 interface PricingFeatureProps {
   children: React.ReactNode;
   dataId?: string;
@@ -23,8 +23,8 @@ const PricingFeature: React.FC<PricingFeatureProps> = ({
   dataId
 }) => {
   return <li className="flex items-center space-x-2 mb-4" data-id={dataId}>
-      <span className="text-gray-400 text-xl">•</span>
-      <span className="text-gray-300">{children}</span>
+      <span className="text-muted-foreground text-xl">•</span>
+      <span className="text-foreground">{children}</span>
     </li>;
 };
 
@@ -57,10 +57,10 @@ const PricingCard: React.FC<PricingCardProps> = ({
   disabled,
   currentPlan,
 }) => {
-  return <div className="flex flex-col w-full px-8 py-12" data-id={dataId}>
+  return <div className="flex flex-col w-full px-8 py-12 bg-transparent" data-id={dataId}>
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-4xl font-medium text-gray-200">{title}</h2>
-        {badge && <span className="px-3 py-1 text-sm font-medium text-red-500 bg-red-500/10 border border-red-500/20 rounded-full">
+        <h2 className="text-4xl font-medium text-foreground">{title}</h2>
+        {badge && <span className="px-3 py-1 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-full">
             {badge}
           </span>}
         {currentPlan && <span className="px-3 py-1 text-sm font-medium text-blue-500 bg-blue-500/10 border border-blue-500/20 rounded-full">
@@ -68,9 +68,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
           </span>}
       </div>
       <div className="mb-10">
-        <p className="text-3xl text-gray-300 mb-2">
+        <p className="text-3xl text-foreground mb-2">
           {price}
-          {period && <span className="text-lg text-gray-400">{period}</span>}
+          {period && <span className="text-lg text-muted-foreground">{period}</span>}
         </p>
       </div>
       <ul className="mb-12">
@@ -80,12 +80,12 @@ const PricingCard: React.FC<PricingCardProps> = ({
         <button
           onClick={onCtaClick}
           disabled={disabled}
-          className={`w-full py-4 text-lg rounded-md transition-colors ${
+          className={`w-full py-4 text-lg rounded-md transition-all duration-200 ${
             disabled
-              ? 'bg-gray-600 text-gray-400 cursor-not-allowed border border-gray-600'
+              ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
               : ctaVariant === 'outline'
-                ? 'border border-red-600 text-red-500 bg-transparent hover:bg-red-700 hover:text-white hover:border-red-700'
-                : 'bg-red-700 text-white border border-red-700 hover:bg-transparent hover:text-red-500 hover:border-red-600'
+                ? 'border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground'
+                : 'bg-primary text-primary-foreground border-2 border-primary hover:bg-transparent hover:text-primary'
           }`}
         >
           {ctaText}
@@ -127,26 +127,26 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <div className="h-dvh w-full bg-background overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">
+        <div className="text-center mb-12 md:mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-lg md:text-xl text-muted-foreground">
             Unlock powerful AI tools for your nonprofit fundraising
           </p>
           {hasActiveSubscription && currentProductId && (
-            <p className="mt-4 text-sm text-gray-500">
-              Current plan: <span className="text-white font-medium capitalize">{currentProductId}</span>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Current plan: <span className="text-foreground font-medium capitalize">{currentProductId}</span>
             </p>
           )}
         </div>
 
         {/* Pricing Cards */}
-        <div className="w-full bg-[#1a1520] text-white rounded-xl overflow-hidden">
-          <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-gray-700">
+        <div className="w-full bg-card/50 backdrop-blur-sm border border-border rounded-xl overflow-hidden">
+          <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border">
             <PricingCard
               title="Pro"
               price="$29"
@@ -218,10 +218,10 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
         </div>
 
         {/* Back to app link */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8 md:mt-12">
           <button
             onClick={() => router.push('/')}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors text-sm md:text-base"
           >
             ← Back to Rōmy
           </button>
