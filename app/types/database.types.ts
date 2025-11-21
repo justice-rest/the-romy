@@ -208,6 +208,13 @@ export type Database = {
           system_prompt: string | null
           onboarding_completed: boolean | null
           onboarding_completed_at: string | null
+          stripe_customer_id: string | null
+          subscription_tier: string | null
+          subscription_status: string | null
+          subscription_period_end: string | null
+          subscription_cancel_at_period_end: boolean | null
+          monthly_message_count: number | null
+          monthly_reset: string | null
         }
         Insert: {
           anonymous?: boolean | null
@@ -227,6 +234,13 @@ export type Database = {
           system_prompt?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
+          stripe_customer_id?: string | null
+          subscription_tier?: string | null
+          subscription_status?: string | null
+          subscription_period_end?: string | null
+          subscription_cancel_at_period_end?: boolean | null
+          monthly_message_count?: number | null
+          monthly_reset?: string | null
         }
         Update: {
           anonymous?: boolean | null
@@ -246,6 +260,13 @@ export type Database = {
           system_prompt?: string | null
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
+          stripe_customer_id?: string | null
+          subscription_tier?: string | null
+          subscription_status?: string | null
+          subscription_period_end?: string | null
+          subscription_cancel_at_period_end?: boolean | null
+          monthly_message_count?: number | null
+          monthly_reset?: string | null
         }
         Relationships: []
       }

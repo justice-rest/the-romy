@@ -6,6 +6,8 @@ import {
   NON_AUTH_DAILY_MESSAGE_LIMIT,
 } from "@/lib/config"
 import { SupabaseClient } from "@supabase/supabase-js"
+import { TIER_LIMITS } from "@/lib/subscriptions/config"
+import type { SubscriptionTier } from "@/lib/subscriptions/types"
 
 const isFreeModel = (modelId: string) => FREE_MODELS_IDS.includes(modelId)
 const isProModel = (modelId: string) => !isFreeModel(modelId)
@@ -24,7 +26,7 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
   const { data: userData, error: userDataError } = await supabase
     .from("users")
     .select(
-      "message_count, daily_message_count, daily_reset, anonymous, premium"
+      "message_count, daily_message_count, daily_reset, anonymous, premium, subscription_tier, subscription_status, monthly_message_count, monthly_reset, subscription_period_end"
     )
     .eq("id", userId)
     .maybeSingle()
@@ -36,12 +38,44 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
     throw new Error("User record not found for id: " + userId)
   }
 
-  // Decide which daily limit to use.
+  // Get subscription tier and limits
+  const tier: SubscriptionTier = (userData.subscription_tier as SubscriptionTier) || 'free'
+  const tierLimits = TIER_LIMITS[tier]
   const isAnonymous = userData.anonymous
-  // (Assuming these are imported from your config)
+
+  // For Pro tier, check monthly limits
+  if (tier === 'pro' && userData.subscription_status === 'active') {
+    const now = new Date()
+    let monthlyCount = userData.monthly_message_count || 0
+    const monthlyReset = userData.monthly_reset ? new Date(userData.monthly_reset) : null
+    const periodEnd = userData.subscription_period_end ? new Date(userData.subscription_period_end) : null
+
+    // Reset monthly counter if we've passed the billing cycle
+    if (periodEnd && now >= periodEnd) {
+      monthlyCount = 0
+      const { error: resetError } = await supabase
+        .from("users")
+        .update({
+          monthly_message_count: 0,
+          monthly_reset: now.toISOString()
+        })
+        .eq("id", userId)
+
+      if (resetError) {
+        throw new Error("Failed to reset monthly count: " + resetError.message)
+      }
+    }
+
+    // Check monthly limit (100 messages for Pro)
+    if (tierLimits.monthlyMessages !== null && monthlyCount >= tierLimits.monthlyMessages) {
+      throw new UsageLimitError("Monthly message limit reached. Upgrade to Max for unlimited messages.")
+    }
+  }
+
+  // Check daily limits (for free tier)
   const dailyLimit = isAnonymous
     ? NON_AUTH_DAILY_MESSAGE_LIMIT
-    : AUTH_DAILY_MESSAGE_LIMIT
+    : tierLimits.dailyMessages
 
   // Reset the daily counter if the day has changed (using UTC).
   const now = new Date()
@@ -66,8 +100,8 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
     }
   }
 
-  // Check if the daily limit is reached.
-  if (dailyCount >= dailyLimit) {
+  // Check if the daily limit is reached (only for tiers with finite daily limits)
+  if (dailyLimit !== Infinity && dailyCount >= dailyLimit) {
     throw new UsageLimitError("Daily message limit reached.")
   }
 
@@ -75,6 +109,8 @@ export async function checkUsage(supabase: SupabaseClient, userId: string) {
     userData,
     dailyCount,
     dailyLimit,
+    tier,
+    monthlyCount: userData.monthly_message_count || 0,
   }
 }
 
@@ -93,7 +129,7 @@ export async function incrementUsage(
 ): Promise<void> {
   const { data: userData, error: userDataError } = await supabase
     .from("users")
-    .select("message_count, daily_message_count")
+    .select("message_count, daily_message_count, monthly_message_count, subscription_tier, subscription_status")
     .eq("id", userId)
     .maybeSingle()
 
@@ -106,18 +142,27 @@ export async function incrementUsage(
 
   const messageCount = userData.message_count || 0
   const dailyCount = userData.daily_message_count || 0
+  const monthlyCount = userData.monthly_message_count || 0
 
   // Increment both overall and daily message counts.
   const newOverallCount = messageCount + 1
   const newDailyCount = dailyCount + 1
 
+  // For Pro tier with active subscription, also increment monthly count
+  const tier: SubscriptionTier = (userData.subscription_tier as SubscriptionTier) || 'free'
+  const updateData: Record<string, any> = {
+    message_count: newOverallCount,
+    daily_message_count: newDailyCount,
+    last_active_at: new Date().toISOString(),
+  }
+
+  if (tier === 'pro' && userData.subscription_status === 'active') {
+    updateData.monthly_message_count = monthlyCount + 1
+  }
+
   const { error: updateError } = await supabase
     .from("users")
-    .update({
-      message_count: newOverallCount,
-      daily_message_count: newDailyCount,
-      last_active_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("id", userId)
 
   if (updateError) {

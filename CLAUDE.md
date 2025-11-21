@@ -111,10 +111,95 @@ See `INSTALL.md` for full SQL schema with RLS policies.
 ### Rate Limiting
 **File**: `/lib/usage.ts`, `/lib/config.ts`
 - Unauthenticated: 5 messages/day (only `gpt-4.1-nano`)
-- Authenticated: 1000 messages/day
-- Pro models: 500 calls total per user
-- File uploads: 5/day
-- Tracking via `users.daily_message_count` with daily reset at UTC midnight
+- Authenticated free tier: 1000 messages/day
+- Pro tier: 100 messages/month (resets at billing cycle)
+- Max tier: Unlimited messages
+- Ultra tier: Unlimited messages + access to all premium models
+- Pro models: 500 calls total per user (legacy - now handled by subscription tiers)
+- File uploads: 5/day (free), 20/day (Pro), unlimited (Max/Ultra)
+- Tracking via `users.daily_message_count` and `users.monthly_message_count` with resets at billing cycle
+
+### Subscription System (Autumn Integration)
+**Overview**: Rōmy uses [Autumn](https://useautumn.com) for subscription management. Autumn acts as a complete subscription database - **no webhooks needed**. All subscription state is managed by Autumn and accessed via their SDK.
+
+**Files**:
+- `/lib/subscriptions/` - Subscription types, config, and access control helpers
+- `/lib/subscriptions/autumn-check.ts` - Autumn check/track API integration
+- `/app/api/autumn/[...all]/route.ts` - Autumn API handler (auto-creates `/api/autumn/*` endpoints)
+- `/app/pricing/` - Pricing page with MM PricingComponent
+- `/migrations/004_add_subscription_fields.sql` - Database schema for local analytics (optional)
+
+**Subscription Tiers** (from `subscription.md`):
+1. **Free** - Default for authenticated users
+   - 1000 messages/day
+   - Access to free models only
+   - 5 file uploads/day
+
+2. **Pro ($29/month)** - Entry tier
+   - 100 messages/month (hard monthly limit)
+   - Access to Pro models
+   - 20 file uploads/day
+   - Email support
+
+3. **Max ($89/month)** - Power user tier
+   - Unlimited messages
+   - Access to Pro models
+   - Unlimited file uploads
+   - Dedicated support
+
+4. **Ultra ($200/month)** - Premium tier
+   - Everything in Max
+   - Access to ALL AI models (including premium)
+   - Fundraising consultation
+   - Priority support
+
+**Key Functions**:
+```typescript
+// Autumn access control (in /lib/subscriptions/autumn-check.ts)
+checkMessageAccess(customerId)    // Check if user can send messages
+trackMessageUsage(customerId)     // Track message usage in Autumn
+
+// React hook usage (from autumn-js/react)
+const { customer, checkout, check, track } = useCustomer()
+customer.products // Current subscriptions
+checkout({ productId: 'pro' })  // Start checkout
+check({ featureId: 'messages' }) // Check feature access
+track({ featureId: 'messages', value: 1 }) // Track usage
+```
+
+**Checkout Flow**:
+1. User visits `/pricing` page
+2. Clicks "Get Started" on desired tier
+3. `useCustomer().checkout({ productId: tier })` initiates checkout
+4. User completes payment on Stripe-hosted page
+5. **Autumn automatically updates subscription state**
+6. User gains immediate access - no webhooks needed!
+
+**Access Control Pattern**:
+```typescript
+// Using Autumn's check API (server-side)
+import { checkMessageAccess } from '@/lib/subscriptions/autumn-check'
+
+const access = await checkMessageAccess(userId)
+if (!access.allowed) {
+  throw new Error('Message limit reached. Please upgrade.')
+}
+
+// Using React hook (client-side)
+const { check } = useCustomer()
+const { data } = check({ featureId: 'messages' })
+if (!data?.allowed) {
+  // Show upgrade prompt
+}
+```
+
+**Important Notes**:
+- **No webhooks required** - Autumn manages all subscription state
+- Use `useCustomer()` hook to access subscription info client-side
+- Use `Autumn.check()` API for server-side access control
+- Configure features in Autumn dashboard (e.g., "messages" feature)
+- Database fields are optional - only for local analytics
+- Anonymous users cannot subscribe (must authenticate first)
 
 ### Security Features
 - **CSRF Protection**: Middleware validates tokens on POST/PUT/DELETE (see `/middleware.ts`, `/lib/csrf.ts`)
@@ -311,6 +396,11 @@ EXA_API_KEY=                    # Optional - enables standalone Exa search tool
 NEXT_PUBLIC_POSTHOG_KEY=        # Optional - enables analytics tracking
 NEXT_PUBLIC_POSTHOG_HOST=       # Optional - defaults to https://us.i.posthog.com
 NEXT_PUBLIC_POSTHOG_ENABLE_RECORDINGS=false  # Optional - enable session recordings
+
+# Autumn Payments (required for subscriptions)
+# Get your API key from https://app.useautumn.com/dev
+# No webhooks needed - Autumn handles all subscription state!
+AUTUMN_SECRET_KEY=              # Server-side secret key
 
 # Production Configuration (optional)
 NEXT_PUBLIC_VERCEL_URL=         # Your production domain

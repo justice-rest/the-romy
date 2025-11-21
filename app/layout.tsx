@@ -12,6 +12,7 @@ import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
 import { UserProvider } from "@/lib/user-store/provider"
 import { getUserProfile } from "@/lib/user/api"
 import { PostHogProvider } from "@/lib/posthog/provider"
+import { AutumnProvider } from "autumn-js/react"
 import { ThemeProvider } from "next-themes"
 import Script from "next/script"
 import { LayoutClient } from "./layout-client"
@@ -55,36 +56,38 @@ export default async function RootLayout({
       >
         <PostHogProvider>
           <TanstackQueryProvider>
-            <LayoutClient />
-            <UserProvider initialUser={userProfile}>
-              <ModelProvider>
-                <ChatsProvider userId={userProfile?.id}>
-                  <ChatSessionProvider>
-                    <UserPreferencesProvider
-                      userId={userProfile?.id}
-                      initialPreferences={userProfile?.preferences}
-                    >
-                      <TooltipProvider
-                        delayDuration={200}
-                        skipDelayDuration={500}
+            <AutumnProvider>
+              <LayoutClient />
+              <UserProvider initialUser={userProfile}>
+                <ModelProvider>
+                  <ChatsProvider userId={userProfile?.id}>
+                    <ChatSessionProvider>
+                      <UserPreferencesProvider
+                        userId={userProfile?.id}
+                        initialPreferences={userProfile?.preferences}
                       >
-                        <ThemeProvider
-                          attribute="class"
-                          defaultTheme="light"
-                          enableSystem
-                          disableTransitionOnChange
+                        <TooltipProvider
+                          delayDuration={200}
+                          skipDelayDuration={500}
                         >
-                          <SidebarProvider defaultOpen>
-                            <Toaster position="top-center" />
-                            {children}
-                          </SidebarProvider>
-                        </ThemeProvider>
-                      </TooltipProvider>
-                    </UserPreferencesProvider>
-                  </ChatSessionProvider>
-                </ChatsProvider>
-              </ModelProvider>
-            </UserProvider>
+                          <ThemeProvider
+                            attribute="class"
+                            defaultTheme="light"
+                            enableSystem
+                            disableTransitionOnChange
+                          >
+                            <SidebarProvider defaultOpen>
+                              <Toaster position="top-center" />
+                              {children}
+                            </SidebarProvider>
+                          </ThemeProvider>
+                        </TooltipProvider>
+                      </UserPreferencesProvider>
+                    </ChatSessionProvider>
+                  </ChatsProvider>
+                </ModelProvider>
+              </UserProvider>
+            </AutumnProvider>
           </TanstackQueryProvider>
         </PostHogProvider>
       </body>
