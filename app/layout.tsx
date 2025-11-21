@@ -42,6 +42,13 @@ export default async function RootLayout({
   const isOfficialDeployment = process.env.ROMY_OFFICIAL === "true"
   const userProfile = await getUserProfile()
 
+  // Get the base URL for Autumn
+  const baseUrl = isDev
+    ? "http://localhost:3000"
+    : process.env.NEXT_PUBLIC_VERCEL_URL
+      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      : "http://localhost:3000"
+
   return (
     <html lang="en" suppressHydrationWarning>
       {isOfficialDeployment ? (
@@ -56,7 +63,7 @@ export default async function RootLayout({
       >
         <PostHogProvider>
           <TanstackQueryProvider>
-            <AutumnProvider>
+            <AutumnProvider backendUrl={baseUrl}>
               <LayoutClient />
               <UserProvider initialUser={userProfile}>
                 <ModelProvider>
