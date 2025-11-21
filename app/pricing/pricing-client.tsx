@@ -60,10 +60,10 @@ const PricingCard: React.FC<PricingCardProps> = ({
   return <div className="flex flex-col w-full px-8 py-12 bg-transparent" data-id={dataId}>
       <div className="flex items-center gap-3 mb-6">
         <h2 className="text-4xl font-medium text-foreground">{title}</h2>
-        {badge && <span className="px-3 py-1 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-full">
+        {badge && <span className="px-3 py-1 text-sm font-medium text-red-600 dark:text-red-500 bg-red-500/10 border border-red-500/20 rounded-full">
             {badge}
           </span>}
-        {currentPlan && <span className="px-3 py-1 text-sm font-medium text-blue-500 bg-blue-500/10 border border-blue-500/20 rounded-full">
+        {currentPlan && <span className="px-3 py-1 text-sm font-medium text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
             Current Plan
           </span>}
       </div>
@@ -80,12 +80,12 @@ const PricingCard: React.FC<PricingCardProps> = ({
         <button
           onClick={onCtaClick}
           disabled={disabled}
-          className={`w-full py-4 text-lg rounded-md transition-all duration-200 ${
+          className={`w-full py-4 text-lg rounded-md transition-all duration-200 font-medium ${
             disabled
               ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
               : ctaVariant === 'outline'
-                ? 'border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground'
-                : 'bg-primary text-primary-foreground border-2 border-primary hover:bg-transparent hover:text-primary'
+                ? 'border-2 border-red-600 text-red-600 dark:border-red-500 dark:text-red-500 bg-transparent hover:bg-red-700 dark:hover:bg-red-600 hover:text-white hover:border-red-700 dark:hover:border-red-600'
+                : 'bg-red-700 dark:bg-red-600 text-white border-2 border-red-700 dark:border-red-600 hover:bg-transparent hover:text-red-600 dark:hover:text-red-500 hover:border-red-600 dark:hover:border-red-500'
           }`}
         >
           {ctaText}
