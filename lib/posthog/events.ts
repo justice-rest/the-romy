@@ -242,28 +242,3 @@ export function trackProjectCreated(projectId: string) {
   })
 }
 
-// ============================================================================
-// Subscription Events
-// ============================================================================
-
-export function trackSubscriptionStarted(plan: string) {
-  trackEvent('subscription_started', {
-    plan,
-  })
-}
-
-export function trackSubscriptionCancelled(plan: string) {
-  trackEvent('subscription_cancelled', {
-    plan,
-  })
-}
-
-export function trackSubscriptionUpgraded(params: {
-  fromPlan: string
-  toPlan: string
-}) {
-  trackEvent('subscription_upgraded', {
-    from_plan: params.fromPlan,
-    to_plan: params.toPlan,
-  })
-}

@@ -51,7 +51,7 @@ Rōmy works with or without Supabase:
 Uses **React Context + React Query** (NOT Zustand despite dependency):
 - `UserPreferencesProvider` - UI settings (layout, prompt suggestions, hidden models)
 - `ModelProvider` - Available models, user key status, favorite models
-- `UserProvider` - User profile with realtime subscriptions
+- `UserProvider` - User profile with realtime updates
 - `ChatsProvider` - Chat list with optimistic updates
 - `MessagesProvider` - Messages for current chat
 - `ChatSessionProvider` - Current chat ID from URL
@@ -225,7 +225,7 @@ const { track, identify, isAvailable } = useAnalytics()
 ```
 
 **Key Features**:
-- Pre-built tracking functions for all major user actions (chat, model, settings, files, search, auth, subscriptions)
+- Pre-built tracking functions for all major user actions (chat, model, settings, files, search, auth)
 - React hooks for component usage (`useAnalytics`, `useFeatureFlag`, `useIsFeatureEnabled`)
 - Feature flags support for A/B testing
 - Graceful degradation when PostHog is not configured

@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ChatsProvider } from "@/lib/chat-store/chats/provider"
 import { ChatSessionProvider } from "@/lib/chat-store/session/provider"
 import { ModelProvider } from "@/lib/model-store/provider"
-import { AutumnWrapper } from "@/lib/subscription/autumn-wrapper"
 import { TanstackQueryProvider } from "@/lib/tanstack-query/tanstack-query-provider"
 import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
 import { UserProvider } from "@/lib/user-store/provider"
@@ -58,35 +57,33 @@ export default async function RootLayout({
           <TanstackQueryProvider>
             <LayoutClient />
             <UserProvider initialUser={userProfile}>
-              <AutumnWrapper>
-                <ModelProvider>
-                  <ChatsProvider userId={userProfile?.id}>
-                    <ChatSessionProvider>
-                      <UserPreferencesProvider
-                        userId={userProfile?.id}
-                        initialPreferences={userProfile?.preferences}
+              <ModelProvider>
+                <ChatsProvider userId={userProfile?.id}>
+                  <ChatSessionProvider>
+                    <UserPreferencesProvider
+                      userId={userProfile?.id}
+                      initialPreferences={userProfile?.preferences}
+                    >
+                      <TooltipProvider
+                        delayDuration={200}
+                        skipDelayDuration={500}
                       >
-                        <TooltipProvider
-                          delayDuration={200}
-                          skipDelayDuration={500}
+                        <ThemeProvider
+                          attribute="class"
+                          defaultTheme="light"
+                          enableSystem
+                          disableTransitionOnChange
                         >
-                          <ThemeProvider
-                            attribute="class"
-                            defaultTheme="light"
-                            enableSystem
-                            disableTransitionOnChange
-                          >
-                            <SidebarProvider defaultOpen>
-                              <Toaster position="top-center" />
-                              {children}
-                            </SidebarProvider>
-                          </ThemeProvider>
-                        </TooltipProvider>
-                      </UserPreferencesProvider>
-                    </ChatSessionProvider>
-                  </ChatsProvider>
-                </ModelProvider>
-              </AutumnWrapper>
+                          <SidebarProvider defaultOpen>
+                            <Toaster position="top-center" />
+                            {children}
+                          </SidebarProvider>
+                        </ThemeProvider>
+                      </TooltipProvider>
+                    </UserPreferencesProvider>
+                  </ChatSessionProvider>
+                </ChatsProvider>
+              </ModelProvider>
             </UserProvider>
           </TanstackQueryProvider>
         </PostHogProvider>

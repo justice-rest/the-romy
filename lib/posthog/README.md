@@ -158,11 +158,6 @@ identifyUser(userId, {
 - `trackUserSignedIn(method)`
 - `trackUserSignedOut()`
 
-### Subscription Events
-- `trackSubscriptionStarted(plan)`
-- `trackSubscriptionCancelled(plan)`
-- `trackSubscriptionUpgraded({ fromPlan, toPlan })`
-
 ### Error Events
 - `trackError({ error, errorType, context })`
 
@@ -188,7 +183,6 @@ import { identifyUser } from '@/lib/posthog'
 identifyUser(user.id, {
   email: user.email,
   name: user.name,
-  plan: user.subscription_plan,
   created_at: user.created_at
 })
 ```

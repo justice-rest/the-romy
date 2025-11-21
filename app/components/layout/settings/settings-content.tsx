@@ -9,11 +9,9 @@ import {
   GearSixIcon,
   PaintBrushIcon,
   PlugsConnectedIcon,
-  CreditCardIcon,
   XIcon,
 } from "@phosphor-icons/react"
 import { useState } from "react"
-import { SubscriptionSection } from "@/components/subscription/subscription-section"
 import { InteractionPreferences } from "./appearance/interaction-preferences"
 import { LayoutSettings } from "./appearance/layout-settings"
 import { ThemeSelection } from "./appearance/theme-selection"
@@ -28,7 +26,7 @@ type SettingsContentProps = {
   isDrawer?: boolean
 }
 
-type TabType = "general" | "appearance" | "subscription" | "connections"
+type TabType = "general" | "appearance" | "connections"
 
 export function SettingsContent({
   isDrawer = false,
@@ -80,15 +78,6 @@ export function SettingsContent({
                   <PaintBrushIcon className="size-4" />
                   <span>Appearance</span>
                 </TabsTrigger>
-                {isSupabaseEnabled && (
-                  <TabsTrigger
-                    value="subscription"
-                    className="flex shrink-0 items-center gap-2"
-                  >
-                    <CreditCardIcon className="size-4" />
-                    <span>Subscription</span>
-                  </TabsTrigger>
-                )}
                 <TabsTrigger
                   value="connections"
                   className="flex shrink-0 items-center gap-2"
@@ -114,10 +103,6 @@ export function SettingsContent({
               <ThemeSelection />
               <LayoutSettings />
               <InteractionPreferences />
-            </TabsContent>
-
-            <TabsContent value="subscription" className="space-y-6 px-6">
-              {isSupabaseEnabled && <SubscriptionSection />}
             </TabsContent>
 
             <TabsContent value="connections" className="space-y-6 px-6">
@@ -151,18 +136,6 @@ export function SettingsContent({
                   </div>
                 </TabsTrigger>
 
-                {isSupabaseEnabled && (
-                  <TabsTrigger
-                    value="subscription"
-                    className="w-full justify-start rounded-md px-3 py-2 text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CreditCardIcon className="size-4" />
-                      <span>Subscription</span>
-                    </div>
-                  </TabsTrigger>
-                )}
-
                 <TabsTrigger
                   value="connections"
                   className="w-full justify-start rounded-md px-3 py-2 text-left"
@@ -191,10 +164,6 @@ export function SettingsContent({
                 <ThemeSelection />
                 <LayoutSettings />
                 <InteractionPreferences />
-              </TabsContent>
-
-              <TabsContent value="subscription" className="mt-0 space-y-6">
-                {isSupabaseEnabled && <SubscriptionSection />}
               </TabsContent>
 
               <TabsContent value="connections" className="mt-0 space-y-6">
