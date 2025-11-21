@@ -12,7 +12,6 @@ import { UserPreferencesProvider } from "@/lib/user-preference-store/provider"
 import { UserProvider } from "@/lib/user-store/provider"
 import { getUserProfile } from "@/lib/user/api"
 import { PostHogProvider } from "@/lib/posthog/provider"
-import { AutumnProvider } from "autumn-js/react"
 import { ThemeProvider } from "next-themes"
 import Script from "next/script"
 import { LayoutClient } from "./layout-client"
@@ -42,13 +41,6 @@ export default async function RootLayout({
   const isOfficialDeployment = process.env.ROMY_OFFICIAL === "true"
   const userProfile = await getUserProfile()
 
-  // Get the base URL for Autumn
-  const baseUrl = isDev
-    ? "http://localhost:3000"
-    : process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : "http://localhost:3000"
-
   return (
     <html lang="en" suppressHydrationWarning>
       {isOfficialDeployment ? (
@@ -63,10 +55,9 @@ export default async function RootLayout({
       >
         <PostHogProvider>
           <TanstackQueryProvider>
-            <AutumnProvider backendUrl={baseUrl}>
-              <LayoutClient />
-              <UserProvider initialUser={userProfile}>
-                <ModelProvider>
+            <LayoutClient />
+            <UserProvider initialUser={userProfile}>
+              <ModelProvider>
                   <ChatsProvider userId={userProfile?.id}>
                     <ChatSessionProvider>
                       <UserPreferencesProvider
@@ -94,7 +85,6 @@ export default async function RootLayout({
                   </ChatsProvider>
                 </ModelProvider>
               </UserProvider>
-            </AutumnProvider>
           </TanstackQueryProvider>
         </PostHogProvider>
       </body>

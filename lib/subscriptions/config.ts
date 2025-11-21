@@ -1,5 +1,5 @@
 /**
- * Subscription configuration for Autumn payment integration
+ * Subscription configuration for Polar.sh payment integration
  * Defines tier limits and plan details
  */
 
@@ -95,8 +95,8 @@ export const SUBSCRIPTION_PLANS: Record<
 };
 
 /**
- * Check if Autumn is properly configured
+ * Check if Polar is properly configured
  */
-export function isAutumnConfigured(): boolean {
-  return !!process.env.AUTUMN_SECRET_KEY;
+export function isPolarConfigured(): boolean {
+  return !!process.env.POLAR_ACCESS_TOKEN;
 }

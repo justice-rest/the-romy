@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.10",
-    "autumn-js": "^0.1.20",
     "@ai-sdk/google": "^1.2.13",
     "@ai-sdk/mistral": "^1.2.0",
     "@ai-sdk/openai": "^1.3.22",
@@ -21,6 +20,8 @@
     "@ai-sdk/xai": "^1.2.16",
     "@openrouter/ai-sdk-provider": "^0.7.1",
     "@phosphor-icons/react": "^2.1.7",
+    "@polar-sh/nextjs": "^0.7.0",
+    "@polar-sh/sdk": "^0.41.5",
     "@radix-ui/react-alert-dialog": "^1.1.13",
     "@radix-ui/react-avatar": "^1.1.3",
     "@radix-ui/react-checkbox": "^1.3.2",
@@ -67,6 +68,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-stick-to-bottom": "^1.1.1",
     "vaul": "^1.1.2",
+    "zod": "^4.1.12",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

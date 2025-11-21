@@ -2,13 +2,12 @@
 
 /**
  * Client-side pricing component
- * Renders the MM PricingComponent with Autumn checkout integration
+ * Renders the MM PricingComponent with Polar.sh checkout integration
  * Adapted to match Rōmy's design system with dark/light mode support
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCustomer } from 'autumn-js/react';
 import type { UserProfile } from '@/lib/user/types';
 import type { SubscriptionTier } from '@/lib/subscriptions/types';
 
@@ -100,29 +99,61 @@ interface PricingPageClientProps {
 
 export function PricingPageClient({ user }: PricingPageClientProps) {
   const router = useRouter();
-  const { customer, checkout, isLoading } = useCustomer();
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentTier, setCurrentTier] = useState<SubscriptionTier | null>(null);
 
-  // Get current plan from Autumn's customer state
-  const currentProductId = customer?.products?.[0]?.id || null;
-  const hasActiveSubscription = customer?.products?.some(p => p.status === 'active') || false;
+  // Fetch current subscription status
+  useEffect(() => {
+    const fetchSubscriptionStatus = async () => {
+      try {
+        const response = await fetch('/api/subscription/status');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentTier(data.tier || 'free');
+        }
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+      }
+    };
+
+    if (user?.email) {
+      fetchSubscriptionStatus();
+    }
+  }, [user?.email]);
 
   const handleSelectPlan = async (tier: Exclude<SubscriptionTier, 'free'>) => {
     // Don't allow selecting current plan
-    if (currentProductId === tier && hasActiveSubscription) {
+    if (currentTier === tier) {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // Trigger Autumn checkout
-      await checkout({
-        productId: tier, // This should match the product IDs configured in Autumn dashboard
+      // Create checkout session via our API
+      const response = await fetch('/api/polar/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: tier,
+          customerEmail: user.email,
+          customerId: user.id,
+          customerName: user.profile_full_name || user.email,
+        }),
       });
 
-      // After successful checkout, Autumn handles everything
-      // No webhooks needed - Autumn manages the subscription state
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { checkoutUrl } = await response.json();
+
+      // Redirect to Polar checkout
+      window.location.href = checkoutUrl;
     } catch (error) {
       console.error('Checkout error:', error);
       alert('Failed to start checkout. Please try again.');
+      setIsLoading(false);
     }
   };
 
@@ -137,9 +168,9 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
           <p className="text-lg md:text-xl text-muted-foreground">
             Unlock powerful AI tools for your nonprofit fundraising
           </p>
-          {hasActiveSubscription && currentProductId && (
+          {currentTier && currentTier !== 'free' && (
             <p className="mt-4 text-sm text-muted-foreground">
-              Current plan: <span className="text-foreground font-medium capitalize">{currentProductId}</span>
+              Current plan: <span className="text-foreground font-medium capitalize">{currentTier}</span>
             </p>
           )}
         </div>
@@ -158,7 +189,7 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
                 'Email support'
               ]}
               ctaText={
-                currentProductId === 'pro' && hasActiveSubscription
+                currentTier === 'pro'
                   ? 'Current Plan'
                   : isLoading
                     ? 'Loading...'
@@ -166,8 +197,8 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
               }
               ctaVariant="outline"
               onCtaClick={() => handleSelectPlan('pro')}
-              disabled={isLoading || (currentProductId === 'pro' && hasActiveSubscription)}
-              currentPlan={currentProductId === 'pro' && hasActiveSubscription}
+              disabled={isLoading || currentTier === 'pro'}
+              currentPlan={currentTier === 'pro'}
             />
             <PricingCard
               title="Max"
@@ -180,7 +211,7 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
                 'Everything in Pro'
               ]}
               ctaText={
-                currentProductId === 'max' && hasActiveSubscription
+                currentTier === 'max'
                   ? 'Current Plan'
                   : isLoading
                     ? 'Loading...'
@@ -189,8 +220,8 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
               ctaVariant="solid"
               badge="Popular"
               onCtaClick={() => handleSelectPlan('max')}
-              disabled={isLoading || (currentProductId === 'max' && hasActiveSubscription)}
-              currentPlan={currentProductId === 'max' && hasActiveSubscription}
+              disabled={isLoading || currentTier === 'max'}
+              currentPlan={currentTier === 'max'}
             />
             <PricingCard
               title="Ultra"
@@ -203,7 +234,7 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
                 'Access to all our AI models'
               ]}
               ctaText={
-                currentProductId === 'ultra' && hasActiveSubscription
+                currentTier === 'ultra'
                   ? 'Current Plan'
                   : isLoading
                     ? 'Loading...'
@@ -211,8 +242,8 @@ export function PricingPageClient({ user }: PricingPageClientProps) {
               }
               ctaVariant="outline"
               onCtaClick={() => handleSelectPlan('ultra')}
-              disabled={isLoading || (currentProductId === 'ultra' && hasActiveSubscription)}
-              currentPlan={currentProductId === 'ultra' && hasActiveSubscription}
+              disabled={isLoading || currentTier === 'ultra'}
+              currentPlan={currentTier === 'ultra'}
             />
           </div>
         </div>
