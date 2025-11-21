@@ -2,12 +2,6 @@
 
 This guide explains how to set up your Rōmy database schema in Supabase.
 
-## Important Note About Subscriptions
-
-**Autumn subscriptions DO NOT require any database tables!**
-
-All subscription data (plans, customers, payments, usage) is managed by Autumn via their API and Stripe. The migration file only creates the core Rōmy tables for chats, messages, users, etc.
-
 ## Prerequisites
 
 - Supabase project created
@@ -64,11 +58,6 @@ Next steps:
   2. Enable authentication providers:
      - Google OAuth (for social login)
      - Anonymous sign-ins (for guest users)
-
-  3. If using subscriptions, configure Autumn products:
-     - Visit: https://app.useautumn.com/sandbox
-     - Create products: basic, premium, pro
-     - See: SUBSCRIPTION_SETUP.md for details
 ```
 
 ## Method 2: Manual Migration via Supabase Dashboard
@@ -104,7 +93,6 @@ NOTICE: Remember to:
 NOTICE: 1. Create storage buckets: chat-attachments, avatars
 NOTICE: 2. Enable Google OAuth in Supabase Auth settings
 NOTICE: 3. Enable anonymous sign-ins in Supabase Auth settings
-NOTICE: 4. Configure Autumn products if using subscriptions
 ```
 
 ## Quick Command Reference
@@ -180,22 +168,6 @@ Navigate to **Authentication > Providers**:
 1. Scroll to **Anonymous sign-ins**
 2. Toggle **ON**
 3. This allows guest users to try Rōmy before signing up
-
-### 3. Set Up Subscriptions (Optional)
-
-If you want to enable paid subscriptions:
-
-1. **Get Autumn API key** from https://app.useautumn.com/sandbox/dev
-2. **Add to environment**:
-   ```bash
-   AUTUMN_SECRET_KEY=am_sk_test_your_key_here
-   ```
-3. **Create products in Autumn dashboard**:
-   - Basic ($29/month) - 100 messages
-   - Premium ($89/month) - Unlimited messages
-   - Pro ($200/month) - Unlimited + consultation
-
-See **SUBSCRIPTION_SETUP.md** for complete instructions.
 
 ## Troubleshooting
 
@@ -324,7 +296,6 @@ npm run migrate
 
 # 3. Create storage buckets in Supabase dashboard
 # 4. Enable Google OAuth + Anonymous auth
-# 5. (Optional) Set up Autumn subscriptions
 ```
 
 That's it! Your database is ready to use. 🚀

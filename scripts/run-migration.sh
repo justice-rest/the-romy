@@ -92,11 +92,6 @@ if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
   echo -e "     - ${YELLOW}Google OAuth${NC} (for social login)"
   echo -e "     - ${YELLOW}Anonymous sign-ins${NC} (for guest users)"
   echo ""
-  echo -e "  3. If using subscriptions, configure Autumn products:"
-  echo -e "     - Visit: ${YELLOW}https://app.useautumn.com/sandbox${NC}"
-  echo -e "     - Create products: basic, premium, pro"
-  echo -e "     - See: ${YELLOW}SUBSCRIPTION_SETUP.md${NC} for details"
-  echo ""
 else
   echo -e "${RED}✗ Migration failed with HTTP code: $HTTP_CODE${NC}"
   echo -e "${RED}Response:${NC}"

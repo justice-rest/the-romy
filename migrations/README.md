@@ -40,9 +40,6 @@ The migrations create:
 
 ## Important Notes
 
-### Subscriptions
-**No subscription-specific tables are needed!** Autumn manages all subscription data via its API and Stripe. The migration only creates Rōmy's core tables.
-
 ### Idempotent
 All migrations use `IF NOT EXISTS` clauses and can be safely run multiple times without errors.
 
@@ -51,7 +48,6 @@ After running migrations, you must manually:
 1. Create storage buckets (`chat-attachments`, `avatars`)
 2. Enable Google OAuth in Supabase Auth
 3. Enable anonymous sign-ins
-4. (Optional) Configure Autumn products
 
 ## Need Help?
 
